@@ -34,6 +34,10 @@ ELDERLY_PERSON_TRIGGERS = (
     "grandfather",
     "grandma",
     "grandpa",
+    # "senior" as a standalone word (e.g. "I'm a senior") requires a context
+    # cue to fire, so it stays here rather than in DIRECT triggers.
+    # "senior student", "senior year" etc. will not match any context cue.
+    "senior",
 )
 
 WEAK_ELDERLY_PERSON_TRIGGERS = (
@@ -82,6 +86,10 @@ ELDERLY_CONTEXT_CUES = (
     "preparing meals",
     "meal support",
     "dietary meals",
+    "meals delivered",
+    "meal delivered",
+    "food delivered",
+    "meals to me",
     "transport",
     "ride",
     "rides",
@@ -125,11 +133,13 @@ def _contains_phrase(text: str, phrase: str) -> bool:
 def is_elderly_context(description: str) -> bool:
     text = _normalize_text(description)
 
-    if any(_contains_phrase(text, phrase) for phrase in DIRECT_ELDERLY_TRIGGERS):
-        return True
-
+    # FP check runs first so direct triggers like "senior" don't fire on
+    # "senior software engineer", "nursing school", etc.
     if any(_contains_phrase(text, phrase) for phrase in ELDERLY_FALSE_POSITIVE_PHRASES):
         return False
+
+    if any(_contains_phrase(text, phrase) for phrase in DIRECT_ELDERLY_TRIGGERS):
+        return True
 
     has_person_trigger = any(
         _contains_phrase(text, trigger)
