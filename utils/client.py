@@ -45,6 +45,13 @@ def _load_keys_from_ssm() -> tuple[str | None, str | None]:
 
 
 GROQ_API_KEY, GEMINI_API_KEY = _load_keys_from_ssm()
+
+# Fall back to env vars (e.g. local .env) when SSM is unavailable
+if not GROQ_API_KEY:
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GEMINI_API_KEY:
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
 groq_source = "ssm" if GROQ_API_KEY else "missing"
 gemini_source = "ssm" if GEMINI_API_KEY else "missing"
 
